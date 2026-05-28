@@ -49,14 +49,19 @@ The hook address ends in `…9088`; its low bits encode the permission flags `af
 
 ```mermaid
 flowchart TD
-    swap([swap]) --> bs[beforeSwap]
-    bs --> skim["skim taxBps(t) of the input,<br/>held as ERC-6909 claims"]
-    skim --> cl([CL swap runs on the remainder])
-    bs -.-> decay["taxBps(t) = startBps × (WINDOW − elapsed) / WINDOW<br/>(linear 30-day decay)"]
-    bs -.-> split["creator (commissionReceiver) + protocol"]
-    bs -.-> ev["emit HookTaxSkim, CommissionAccrued"]
-    init[afterInitialize] --> gate["require Portal.status == DEX,<br/>cache creator / migrationTs / startTax,<br/>emit HookGraduation"]
-    claim["claim(currency)"] --> redeem["unlock, burn ERC-6909 claims, pay out ERC-20"]
+    subgraph init["afterInitialize · per pool"]
+        G1["require Portal.status == DEX"] --> G2["cache creator, migrationTs, startTax"] --> G3["emit HookGraduation"]
+    end
+    subgraph swap["beforeSwap · per swap"]
+        S1["taxBps(t) = startBps * (WINDOW - elapsed) / WINDOW"] --> S2["skim taxBps(t) of the input,<br/>held as ERC-6909 claims"]
+        S2 --> S3["split into creator + protocol"]
+        S3 --> S4["emit HookTaxSkim + CommissionAccrued"]
+        S4 --> S5["CL swap runs on the remainder"]
+    end
+    subgraph claim["claim · anytime"]
+        C1[unlock] --> C2["burn ERC-6909 claims"] --> C3["pay out ERC-20"]
+    end
+    init --> swap --> claim
 ```
 
 | On-chain event | Emitted by | Meaning |

@@ -49,14 +49,19 @@ Hook 地址以 `…9088` 结尾，低位编码了权限标志 `afterInitialize |
 
 ```mermaid
 flowchart TD
-    swap([swap]) --> bs[beforeSwap]
-    bs --> skim["从输入里撇取 taxBps(t),<br/>记为 ERC-6909 claims"]
-    skim --> cl([兑换在剩余部分上执行])
-    bs -.-> decay["taxBps(t) = 起始税率 × (周期 − 已过) / 周期<br/>(30 天线性衰减)"]
-    bs -.-> split["创作者 (commissionReceiver) + 协议"]
-    bs -.-> ev["emit HookTaxSkim, CommissionAccrued"]
-    init[afterInitialize] --> gate["要求 Portal.status == DEX,<br/>缓存 creator / migrationTs / startTax,<br/>emit HookGraduation"]
-    claim["claim(currency)"] --> redeem["unlock,销毁 ERC-6909 claims,兑付 ERC-20"]
+    subgraph init["afterInitialize · 每个池子一次"]
+        G1["要求 Portal.status == DEX"] --> G2["缓存 creator, migrationTs, startTax"] --> G3["emit HookGraduation"]
+    end
+    subgraph swap["beforeSwap · 每笔 swap"]
+        S1["taxBps(t) = 起始税率 * (周期 - 已过) / 周期"] --> S2["从输入里撇取 taxBps(t),<br/>记为 ERC-6909 claims"]
+        S2 --> S3["拆分给 创作者 + 协议"]
+        S3 --> S4["emit HookTaxSkim + CommissionAccrued"]
+        S4 --> S5["兑换在剩余部分上执行"]
+    end
+    subgraph claim["claim · 随时"]
+        C1[unlock] --> C2["销毁 ERC-6909 claims"] --> C3["兑付 ERC-20"]
+    end
+    init --> swap --> claim
 ```
 
 | 链上事件 | 触发于 | 含义 |
