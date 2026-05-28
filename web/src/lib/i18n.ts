@@ -44,7 +44,7 @@ type Dict = {
     rowTax: string; rowInto: string; rowOut: string;
     connect: string; switchChain: string; mint: string; approve: string; swap: string;
     confirm: string; confirming: string; swapped: string; failed: string; view: string; viewPanel: string;
-    hint: string; balance: string; addToWallet: string;
+    hint: string; balance: string; addToWallet: string; gas: string; faucet: string;
   };
   footer: { left: string; right: string };
 };
@@ -96,11 +96,11 @@ const en: Dict = {
     confirm: "Confirm in wallet…",
     confirming: "Confirming…",
     swapped: "Swap confirmed on-chain ✓. The Tax skim feed and commission panel above update shortly.",
-    failed: "Transaction failed. Check your wallet and try again.",
+    failed: "Transaction failed. Make sure your wallet holds X Layer testnet OKB for gas, then retry.",
     view: "tx ↗",
     viewPanel: "view panel ↑",
     hint: "Real swap on X Layer testnet. The first click mints test tokens, then approves, then swaps.",
-    balance: "balance", addToWallet: "Add to wallet",
+    balance: "balance", addToWallet: "Add to wallet", gas: "Need testnet OKB for gas?", faucet: "Faucet ↗",
   },
   footer: { left: "Uniswap V4 × Flap × X Layer · Build X Hackathon", right: "a working build of the V4_UNI_MIGRATOR path Flap scoped but hasn't shipped." },
 };
@@ -152,11 +152,11 @@ const zh: Dict = {
     confirm: "在钱包中确认…",
     confirming: "确认中…",
     swapped: "兑换已上链 ✓ 上方的「撇税流水」和「累计佣金」面板稍后会更新。",
-    failed: "交易失败，请检查钱包后重试。",
+    failed: "交易失败。请确认钱包里有 X Layer 测试网 OKB 当 gas，然后重试。",
     view: "交易 ↗",
     viewPanel: "看面板 ↑",
     hint: "X Layer 测试网真实兑换。首次点击会先领取测试代币，再授权，然后兑换。",
-    balance: "余额", addToWallet: "加入钱包",
+    balance: "余额", addToWallet: "加入钱包", gas: "没有测试网 OKB 当 gas?", faucet: "领水龙头 ↗",
   },
   footer: { left: "Uniswap V4 × Flap × X Layer · Build X 黑客松", right: "Flap 规划但未上线的 V4_UNI_MIGRATOR 路径的一个可用实现。" },
 };

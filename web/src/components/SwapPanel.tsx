@@ -52,6 +52,7 @@ const POOL_KEY = {
 const SETTINGS = { takeClaims: false, settleUsingBurn: false } as const;
 const MINT_AMOUNT = parseUnits("1000000", 18); // generous test-token mint so one click covers any demo size
 const OKLINK_TX = "https://www.oklink.com/x-layer-testnet/tx";
+const FAUCET_URL = "https://www.okx.com/xlayer/faucet";
 const fmtBal = (b?: bigint) => (b === undefined ? "…" : fmtNum(Number(formatUnits(b, 18)), 2));
 
 export function SwapPanel(p: Props) {
@@ -271,6 +272,13 @@ export function SwapPanel(p: Props) {
       ) : (
         <p className="mt-3 text-center font-mono text-[0.65rem] text-faint">{t.hint}</p>
       )}
+
+      <p className="mt-2 text-center font-mono text-[0.6rem] text-faint">
+        {t.gas}{" "}
+        <a href={FAUCET_URL} target="_blank" rel="noreferrer" className="underline hover:text-fg">
+          {t.faucet}
+        </a>
+      </p>
 
       {/* balances + add tokens to wallet (the mock tokens aren't auto-detected by wallets) */}
       {isConnected && !wrongChain && (
