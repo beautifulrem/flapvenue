@@ -26,7 +26,6 @@ export function TradeTerminal({
   const open24 = useRef(startPrice * 0.963); // ~+3.8% day to start
   const hi = useRef(startPrice * 1.021);
   const lo = useRef(startPrice * 0.955);
-  const [, force] = useState(0);
 
   useEffect(() => {
     const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -37,12 +36,15 @@ export function TradeTerminal({
     setLive(true);
     let price = startPrice;
     const id = setInterval(() => {
-      price = Math.max(startPrice * 0.5, price * (1 + (Math.random() - 0.5) * 0.008));
+      // Lively but mean-reverting around startPrice (plus a faint up bias), so the demo token stays
+      // healthy instead of random-walking into a crash.
+      const revert = ((startPrice - price) / startPrice) * 0.05;
+      const noise = (Math.random() - 0.5) * 0.006;
+      price = Math.max(startPrice * 0.85, price * (1 + noise + revert + 0.0003));
       hi.current = Math.max(hi.current, price);
       lo.current = Math.min(lo.current, price);
       setLast(price);
       setBook(genBook(price));
-      force((n) => n + 1);
     }, 1200);
     return () => clearInterval(id);
   }, [startPrice]);
