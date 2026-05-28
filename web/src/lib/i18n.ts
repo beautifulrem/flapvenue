@@ -42,8 +42,9 @@ type Dict = {
     note: string;
     panelTitle: string; buy: string; sell: string; youPay: string;
     rowTax: string; rowInto: string; rowOut: string;
-    connectToSwap: string; recorded: string; swap: string;
-    demoNote: string;
+    connect: string; switchChain: string; mint: string; approve: string; swap: string;
+    confirm: string; confirming: string; swapped: string; failed: string; view: string;
+    hint: string;
   };
   footer: { left: string; right: string };
 };
@@ -87,8 +88,17 @@ const en: Dict = {
     note: "The tax is a hook delta, not an ERC-20 transfer tax. That's the whole reason a Flap tax token can sit in a concentrated-liquidity pool, which its live graduation path can't.",
     panelTitle: "Swap · FlapVenue pool", buy: "Buy", sell: "Sell", youPay: "you pay",
     rowTax: "creator tax skimmed", rowInto: "into the CL swap", rowOut: "{sym} into CL swap (illustrative)",
-    connectToSwap: "Connect wallet to swap", recorded: "Skim recorded ✓", swap: "Swap",
-    demoNote: "Demo preview · the hook + pool are live on X Layer testnet; this panel illustrates the tax skim.",
+    connect: "Connect wallet",
+    switchChain: "Switch to X Layer testnet",
+    mint: "Get test {sym}",
+    approve: "Approve {sym}",
+    swap: "Swap",
+    confirm: "Confirm in wallet…",
+    confirming: "Confirming…",
+    swapped: "Swap sent on-chain ✓. The new HookTaxSkim shows in the dashboard below within ~15s.",
+    failed: "Transaction failed. Check your wallet and try again.",
+    view: "view ↗",
+    hint: "Real swap on X Layer testnet. The first click mints test tokens, then approves, then swaps.",
   },
   footer: { left: "Uniswap V4 × Flap × X Layer · Build X Hackathon", right: "a working build of the V4_UNI_MIGRATOR path Flap scoped but hasn't shipped." },
 };
@@ -132,8 +142,17 @@ const zh: Dict = {
     note: "税是一个 hook delta，不是 ERC-20 转账税。正因如此，Flap 税代币才能待在集中流动性池里，这是它现有毕业路径做不到的。",
     panelTitle: "兑换 · FlapVenue 池", buy: "买入", sell: "卖出", youPay: "你支付",
     rowTax: "撇取的创作者税", rowInto: "进入 CL 兑换", rowOut: "{sym} 进入 CL 兑换（示意）",
-    connectToSwap: "连接钱包后兑换", recorded: "已记录撇税 ✓", swap: "兑换",
-    demoNote: "演示预览 · hook 与池子已在 X Layer 测试网上线；此面板示意税的撇取过程。",
+    connect: "连接钱包",
+    switchChain: "切换到 X Layer 测试网",
+    mint: "领取测试 {sym}",
+    approve: "授权 {sym}",
+    swap: "兑换",
+    confirm: "在钱包中确认…",
+    confirming: "确认中…",
+    swapped: "兑换已上链 ✓ 下方数据面板约 15 秒后会出现这笔 HookTaxSkim。",
+    failed: "交易失败，请检查钱包后重试。",
+    view: "查看 ↗",
+    hint: "X Layer 测试网真实兑换。首次点击会先领取测试代币，再授权，然后兑换。",
   },
   footer: { left: "Uniswap V4 × Flap × X Layer · Build X 黑客松", right: "Flap 规划但未上线的 V4_UNI_MIGRATOR 路径的一个可用实现。" },
 };

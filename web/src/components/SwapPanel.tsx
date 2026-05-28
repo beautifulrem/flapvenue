@@ -1,7 +1,31 @@
 "use client";
 
-import { useState } from "react";
-import { useAccount } from "wagmi";
+import { useEffect, useState } from "react";
+import {
+  useAccount,
+  useChainId,
+  useConnect,
+  useReadContract,
+  useSwitchChain,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
+import { maxUint256, parseUnits } from "viem";
+import {
+  CURRENCY0,
+  CURRENCY1,
+  FLAP_TOKEN,
+  QUOTE_TOKEN,
+  SWAP_ROUTER,
+  FLAPVENUE_ADDRESS,
+  POOL_FEE,
+  TICK_SPACING,
+  MIN_SQRT_PRICE_LIMIT,
+  MAX_SQRT_PRICE_LIMIT,
+  XLAYER_TESTNET_CHAIN_ID,
+  erc20Abi,
+  poolSwapTestAbi,
+} from "@/lib/contracts";
 import { currentTaxBps, formatPercent } from "@/lib/data/decay";
 import { fmtNum } from "@/lib/format";
 import { getDict, interp, type Lang } from "@/lib/i18n";
@@ -16,26 +40,129 @@ type Props = {
   lang: Lang;
 };
 
+const POOL_KEY = {
+  currency0: CURRENCY0,
+  currency1: CURRENCY1,
+  fee: POOL_FEE,
+  tickSpacing: TICK_SPACING,
+  hooks: FLAPVENUE_ADDRESS,
+} as const;
+const SETTINGS = { takeClaims: false, settleUsingBurn: false } as const;
+const MINT_AMOUNT = parseUnits("1000000", 18); // generous test-token mint so one click covers any demo size
+const OKLINK_TX = "https://www.oklink.com/x-layer-testnet/tx";
+
 export function SwapPanel(p: Props) {
   const t = getDict(p.lang).swap;
-  const { isConnected } = useAccount();
+  const { address, isConnected } = useAccount();
+  const chainId = useChainId();
+  const { connect, connectors } = useConnect();
+  const { switchChain, isPending: switching } = useSwitchChain();
+
   const [amount, setAmount] = useState("100");
-  const [buy, setBuy] = useState(true); // buy = quote -> flap (tax taken on quote input)
-  const [submitted, setSubmitted] = useState(false);
+  const [buy, setBuy] = useState(true); // buy FLAP: input = quote (currency1), zeroForOne = false
+  const [action, setAction] = useState<"mint" | "approve" | "swap" | null>(null);
 
   const bps = currentTaxBps(p.startBps, p.migrationTs, p.now, p.windowSec);
   const amt = Number(amount) || 0;
   const tax = (amt * bps) / 10_000;
   const swapped = amt - tax;
+  const inputToken = buy ? QUOTE_TOKEN : FLAP_TOKEN;
   const inSym = buy ? p.quoteSymbol : p.flapSymbol;
   const outSym = buy ? p.flapSymbol : p.quoteSymbol;
+  const amountWei = amt > 0 ? parseUnits(String(amt), 18) : 0n;
+  const wrongChain = isConnected && chainId !== XLAYER_TESTNET_CHAIN_ID;
+
+  const { data: balance, refetch: refetchBal } = useReadContract({
+    address: inputToken,
+    abi: erc20Abi,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    query: { enabled: !!address && !wrongChain },
+  });
+  const { data: allowance, refetch: refetchAllow } = useReadContract({
+    address: inputToken,
+    abi: erc20Abi,
+    functionName: "allowance",
+    args: address ? [address, SWAP_ROUTER] : undefined,
+    query: { enabled: !!address && !wrongChain },
+  });
+
+  const { writeContract, data: txHash, isPending: signing, error: writeError, reset } = useWriteContract();
+  const { isLoading: confirming, isSuccess: confirmed } = useWaitForTransactionReceipt({ hash: txHash });
+
+  useEffect(() => {
+    if (confirmed) {
+      refetchBal();
+      refetchAllow();
+    }
+  }, [confirmed, refetchBal, refetchAllow]);
+
+  const readsReady = balance !== undefined && allowance !== undefined;
+  const needsMint = readsReady && balance < amountWei;
+  const needsApprove = readsReady && !needsMint && allowance < amountWei;
+  const busy = signing || confirming || switching;
+
+  function onAction() {
+    if (!isConnected) {
+      const c = connectors[0];
+      if (c) connect({ connector: c });
+      return;
+    }
+    if (wrongChain) {
+      switchChain({ chainId: XLAYER_TESTNET_CHAIN_ID });
+      return;
+    }
+    if (amt <= 0 || !readsReady) return;
+    reset();
+    if (needsMint) {
+      setAction("mint");
+      writeContract({ address: inputToken, abi: erc20Abi, functionName: "mint", args: [address!, MINT_AMOUNT] });
+    } else if (needsApprove) {
+      setAction("approve");
+      writeContract({ address: inputToken, abi: erc20Abi, functionName: "approve", args: [SWAP_ROUTER, maxUint256] });
+    } else {
+      setAction("swap");
+      const zeroForOne = !buy;
+      writeContract({
+        address: SWAP_ROUTER,
+        abi: poolSwapTestAbi,
+        functionName: "swap",
+        args: [
+          POOL_KEY,
+          { zeroForOne, amountSpecified: -amountWei, sqrtPriceLimitX96: zeroForOne ? MIN_SQRT_PRICE_LIMIT : MAX_SQRT_PRICE_LIMIT },
+          SETTINGS,
+          "0x",
+        ],
+      });
+    }
+  }
+
+  const label = !isConnected
+    ? t.connect
+    : wrongChain
+      ? t.switchChain
+      : signing
+        ? t.confirm
+        : confirming
+          ? t.confirming
+          : amt <= 0 || !readsReady
+            ? t.swap
+            : needsMint
+              ? interp(t.mint, { sym: inSym })
+              : needsApprove
+                ? interp(t.approve, { sym: inSym })
+                : t.swap;
+
+  const disabled = busy || (isConnected && !wrongChain && (amt <= 0 || !readsReady));
+  const swapDone = confirmed && action === "swap";
 
   return (
     <div className="hairline rounded-xl bg-surface/60 p-5">
       <div className="flex items-center justify-between">
         <h3 className="kicker">{t.panelTitle}</h3>
         <span className="rounded-full bg-decaydim px-2 py-1 font-mono text-[0.65rem] text-decay">
-          {p.lang === "zh" ? "税 " : "tax "}{formatPercent(bps)}
+          {p.lang === "zh" ? "税 " : "tax "}
+          {formatPercent(bps)}
         </span>
       </div>
 
@@ -64,10 +191,7 @@ export function SwapPanel(p: Props) {
           <input
             inputMode="decimal"
             value={amount}
-            onChange={(e) => {
-              setAmount(e.target.value.replace(/[^0-9.]/g, ""));
-              setSubmitted(false);
-            }}
+            onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}
             className="w-full bg-transparent font-mono text-xl text-fg outline-none"
             placeholder="0.0"
           />
@@ -85,17 +209,32 @@ export function SwapPanel(p: Props) {
       {/* action */}
       <button
         type="button"
-        disabled={!isConnected || amt <= 0}
-        onClick={() => setSubmitted(true)}
+        disabled={disabled}
+        onClick={onAction}
         className="mt-5 w-full cursor-pointer rounded-md bg-accent py-3 font-mono text-sm font-semibold text-bg transition-transform enabled:hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        {!isConnected ? t.connectToSwap : submitted ? t.recorded : t.swap}
+        {label}
       </button>
 
-      {submitted && isConnected && (
-        <p className="mt-3 text-center font-mono text-[0.65rem] text-muted">
-          {t.demoNote}
+      {/* status */}
+      {writeError ? (
+        <p className="mt-3 text-center font-mono text-[0.65rem] text-decay">{t.failed}</p>
+      ) : swapDone ? (
+        <p className="mt-3 text-center font-mono text-[0.65rem] text-accent">
+          {t.swapped}{" "}
+          <a href={`${OKLINK_TX}/${txHash}`} target="_blank" rel="noreferrer" className="underline">
+            {t.view}
+          </a>
         </p>
+      ) : txHash && confirming ? (
+        <p className="mt-3 text-center font-mono text-[0.65rem] text-muted">
+          {t.confirming}{" "}
+          <a href={`${OKLINK_TX}/${txHash}`} target="_blank" rel="noreferrer" className="underline">
+            {t.view}
+          </a>
+        </p>
+      ) : (
+        <p className="mt-3 text-center font-mono text-[0.65rem] text-faint">{t.hint}</p>
       )}
     </div>
   );

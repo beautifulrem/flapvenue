@@ -41,36 +41,45 @@ async function scanLogs<TName extends "HookGraduation" | "HookTaxSkim">(eventNam
   return chunks.flat();
 }
 
-// --- promise-level caches so the dashboard's parallel fetches share in-flight RPC calls ---
-let _syms: Promise<Record<string, string>> | null = null;
-let _grads: ReturnType<typeof scanLogs<"HookGraduation">> | null = null;
-let _skims: ReturnType<typeof scanLogs<"HookTaxSkim">> | null = null;
-let _protocol: Promise<ViemAddress> | null = null;
-
-function symsP() {
-  return (_syms ??= (async () => {
-    const [flap, quote] = await Promise.all([
-      client.readContract({ address: FLAP_TOKEN, abi: erc20Abi, functionName: "symbol" }).catch(() => "FLAP"),
-      client.readContract({ address: QUOTE_TOKEN, abi: erc20Abi, functionName: "symbol" }).catch(() => "QUOTE"),
-    ]);
-    return { [FLAP_TOKEN.toLowerCase()]: flap as string, [QUOTE_TOKEN.toLowerCase()]: quote as string };
-  })());
+// Short-TTL promise caches: parallel fetches within one render share a single scan, but a newly
+// submitted on-chain swap shows up on the next refresh once the TTL lapses, instead of being frozen
+// for the whole process lifetime.
+const CACHE_TTL_MS = 15_000;
+function cached<T>(fn: () => Promise<T>): () => Promise<T> {
+  let value: Promise<T> | null = null;
+  let stamp = 0;
+  return () => {
+    const now = Date.now();
+    if (!value || now - stamp > CACHE_TTL_MS) {
+      stamp = now;
+      value = fn().catch((err) => {
+        value = null; // never cache a failed scan
+        throw err;
+      });
+    }
+    return value;
+  };
 }
+
+const symsP = cached(async () => {
+  const [flap, quote] = await Promise.all([
+    client.readContract({ address: FLAP_TOKEN, abi: erc20Abi, functionName: "symbol" }).catch(() => "FLAP"),
+    client.readContract({ address: QUOTE_TOKEN, abi: erc20Abi, functionName: "symbol" }).catch(() => "QUOTE"),
+  ]);
+  return { [FLAP_TOKEN.toLowerCase()]: flap as string, [QUOTE_TOKEN.toLowerCase()]: quote as string };
+});
 const symOf = (m: Record<string, string>, addr: string) => m[addr.toLowerCase()] ?? "TOKEN";
 
-function gradsP() {
-  return (_grads ??= scanLogs("HookGraduation"));
-}
-function skimsP() {
-  return (_skims ??= scanLogs("HookTaxSkim"));
-}
-function protocolP() {
-  return (_protocol ??= client.readContract({
-    address: FLAPVENUE_ADDRESS,
-    abi: flapVenueAbi,
-    functionName: "protocolTreasury",
-  }) as Promise<ViemAddress>);
-}
+const gradsP = cached(() => scanLogs("HookGraduation"));
+const skimsP = cached(() => scanLogs("HookTaxSkim"));
+const protocolP = cached(
+  () =>
+    client.readContract({
+      address: FLAPVENUE_ADDRESS,
+      abi: flapVenueAbi,
+      functionName: "protocolTreasury",
+    }) as Promise<ViemAddress>,
+);
 
 async function blockTimes(blockNumbers: (bigint | null)[]): Promise<Map<string, number>> {
   const uniq = [...new Set(blockNumbers.filter((b): b is bigint => b !== null).map(String))];
@@ -151,12 +160,9 @@ export const liveSource: DataSource = {
   },
 
   async getPoolStats(): Promise<PoolStats> {
+    // Only swaps24h (the skim count) is surfaced in the dashboard; the other fields are unused
+    // placeholders kept for the PoolStats shape. Don't fabricate a cross-currency "volume" here.
     const logs = await skimsP();
-    let volume = 0;
-    for (const l of logs) {
-      const bps = Number(l.args.taxBps);
-      if (bps > 0) volume += Number(formatUnits(l.args.taxAmount as bigint, 18)) / (bps / 10_000);
-    }
-    return { priceUsd: 1, tvlUsd: 0, volume24hUsd: volume, swaps24h: logs.length };
+    return { priceUsd: 0, tvlUsd: 0, volume24hUsd: 0, swaps24h: logs.length };
   },
 };
