@@ -274,30 +274,52 @@ export function SwapPanel(p: Props) {
 
       {/* balances + add tokens to wallet (the mock tokens aren't auto-detected by wallets) */}
       {isConnected && !wrongChain && (
-        <div className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t border-line pt-3 font-mono text-[0.6rem] text-faint">
-          <span>
-            {fmtBal(flapBal)} {p.flapSymbol} · {fmtBal(quoteBal)} {p.quoteSymbol}
-          </span>
-          <span className="flex items-center gap-2">
-            {t.addToWallet}:
+        <div className="mt-4 border-t border-line pt-4">
+          <div className="flex items-center justify-between font-mono text-[0.7rem]">
+            <span className="text-muted">{t.balance}</span>
+            <span className="text-fg">
+              {fmtBal(flapBal)} {p.flapSymbol} · {fmtBal(quoteBal)} {p.quoteSymbol}
+            </span>
+          </div>
+          <p className="kicker mt-3">{t.addToWallet}</p>
+          <div className="mt-2 grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={() => watchAsset({ type: "ERC20", options: { address: FLAP_TOKEN, symbol: p.flapSymbol, decimals: 18 } })}
-              className="cursor-pointer underline hover:text-fg"
+              className="hairline flex items-center justify-center gap-1.5 rounded-md py-2.5 font-mono text-xs font-semibold text-accent transition-colors hover:border-accent hover:bg-accentdim"
             >
-              + {p.flapSymbol}
+              <WalletPlusIcon /> {p.flapSymbol}
             </button>
             <button
               type="button"
               onClick={() => watchAsset({ type: "ERC20", options: { address: QUOTE_TOKEN, symbol: p.quoteSymbol, decimals: 18 } })}
-              className="cursor-pointer underline hover:text-fg"
+              className="hairline flex items-center justify-center gap-1.5 rounded-md py-2.5 font-mono text-xs font-semibold text-accent transition-colors hover:border-accent hover:bg-accentdim"
             >
-              + {p.quoteSymbol}
+              <WalletPlusIcon /> {p.quoteSymbol}
             </button>
-          </span>
+          </div>
         </div>
       )}
     </div>
+  );
+}
+
+function WalletPlusIcon() {
+  return (
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2" />
+      <path d="M16 12h6v4h-6a2 2 0 0 1 0-4Z" />
+    </svg>
   );
 }
 
