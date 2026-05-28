@@ -23,13 +23,28 @@ const chain = defineChain({
 
 const client = createPublicClient({ chain, transport: http(XLAYER_TESTNET_RPC) });
 
-// X Layer testnet caps eth_getLogs to a 100-block window, so scan a fixed span from the deploy block
-// (where all the demo events live) in 100-block chunks, in parallel.
-async function scanLogs<TName extends "HookGraduation" | "HookTaxSkim">(eventName: TName) {
-  const end = DEPLOY_BLOCK + LOG_SCAN_SPAN;
+// X Layer testnet caps eth_getLogs to a 100-block window, so scan in 100-block chunks in parallel.
+// The seeded demo events sit just after the deploy block; a fresh user swap lands near the chain head,
+// so for skims we also scan a trailing window of the most recent blocks and merge the two.
+const RECENT_SPAN = 2500n;
+
+function chunk100(from: bigint, to: bigint): Array<[bigint, bigint]> {
   const ranges: Array<[bigint, bigint]> = [];
-  for (let b = DEPLOY_BLOCK; b <= end; b += 100n) {
-    ranges.push([b, b + 99n > end ? end : b + 99n]);
+  for (let b = from; b <= to; b += 100n) ranges.push([b, b + 99n > to ? to : b + 99n]);
+  return ranges;
+}
+
+async function scanLogs<TName extends "HookGraduation" | "HookTaxSkim">(eventName: TName) {
+  const deployEnd = DEPLOY_BLOCK + LOG_SCAN_SPAN;
+  const ranges = chunk100(DEPLOY_BLOCK, deployEnd);
+  if (eventName === "HookTaxSkim") {
+    try {
+      const head = await client.getBlockNumber();
+      const recentFrom = head > RECENT_SPAN ? head - RECENT_SPAN : 0n;
+      if (recentFrom > deployEnd) ranges.push(...chunk100(recentFrom, head));
+    } catch {
+      // if the head can't be read, fall back to the deploy window alone
+    }
   }
   const chunks = await Promise.all(
     ranges.map(([fromBlock, toBlock]) =>
@@ -38,7 +53,13 @@ async function scanLogs<TName extends "HookGraduation" | "HookTaxSkim">(eventNam
         .catch(() => []),
     ),
   );
-  return chunks.flat();
+  const seen = new Set<string>();
+  return chunks.flat().filter((l) => {
+    const k = `${l.transactionHash}-${l.logIndex}`;
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
 }
 
 // Short-TTL promise caches: parallel fetches within one render share a single scan, but a newly
@@ -142,7 +163,7 @@ export const liveSource: DataSource = {
       symbol: symOf(m, l.args.currency as string),
       txHash: l.transactionHash as Address,
     }));
-    return skims.reverse().slice(0, limit);
+    return skims.sort((a, b) => b.ts - a.ts).slice(0, limit);
   },
 
   async getGraduations(): Promise<Graduation[]> {

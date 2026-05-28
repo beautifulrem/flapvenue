@@ -43,7 +43,7 @@ type Dict = {
     panelTitle: string; buy: string; sell: string; youPay: string;
     rowTax: string; rowInto: string; rowOut: string;
     connect: string; switchChain: string; mint: string; approve: string; swap: string;
-    confirm: string; confirming: string; swapped: string; failed: string; view: string;
+    confirm: string; confirming: string; swapped: string; failed: string; view: string; viewPanel: string;
     hint: string;
   };
   footer: { left: string; right: string };
@@ -95,9 +95,10 @@ const en: Dict = {
     swap: "Swap",
     confirm: "Confirm in wallet…",
     confirming: "Confirming…",
-    swapped: "Swap sent on-chain ✓. The new HookTaxSkim shows in the dashboard below within ~15s.",
+    swapped: "Swap confirmed on-chain ✓. The Tax skim feed and commission panel above update shortly.",
     failed: "Transaction failed. Check your wallet and try again.",
-    view: "view ↗",
+    view: "tx ↗",
+    viewPanel: "view panel ↑",
     hint: "Real swap on X Layer testnet. The first click mints test tokens, then approves, then swaps.",
   },
   footer: { left: "Uniswap V4 × Flap × X Layer · Build X Hackathon", right: "a working build of the V4_UNI_MIGRATOR path Flap scoped but hasn't shipped." },
@@ -149,9 +150,10 @@ const zh: Dict = {
     swap: "兑换",
     confirm: "在钱包中确认…",
     confirming: "确认中…",
-    swapped: "兑换已上链 ✓ 下方数据面板约 15 秒后会出现这笔 HookTaxSkim。",
+    swapped: "兑换已上链 ✓ 上方的「撇税流水」和「累计佣金」面板稍后会更新。",
     failed: "交易失败，请检查钱包后重试。",
-    view: "查看 ↗",
+    view: "交易 ↗",
+    viewPanel: "看面板 ↑",
     hint: "X Layer 测试网真实兑换。首次点击会先领取测试代币，再授权，然后兑换。",
   },
   footer: { left: "Uniswap V4 × Flap × X Layer · Build X 黑客松", right: "Flap 规划但未上线的 V4_UNI_MIGRATOR 路径的一个可用实现。" },

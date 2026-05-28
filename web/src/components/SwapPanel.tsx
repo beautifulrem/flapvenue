@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   useAccount,
   useChainId,
@@ -57,6 +58,7 @@ export function SwapPanel(p: Props) {
   const chainId = useChainId();
   const { connect, connectors } = useConnect();
   const { switchChain, isPending: switching } = useSwitchChain();
+  const router = useRouter();
 
   const [amount, setAmount] = useState("100");
   const [buy, setBuy] = useState(true); // buy FLAP: input = quote (currency1), zeroForOne = false
@@ -96,6 +98,15 @@ export function SwapPanel(p: Props) {
       refetchAllow();
     }
   }, [confirmed, refetchBal, refetchAllow]);
+
+  // After a swap lands, refresh the server components (the dashboard above) once the data cache TTL
+  // lapses, so the new HookTaxSkim and commission totals appear without a manual reload.
+  useEffect(() => {
+    if (confirmed && action === "swap") {
+      const id = setTimeout(() => router.refresh(), 18_000);
+      return () => clearTimeout(id);
+    }
+  }, [confirmed, action, router]);
 
   const readsReady = balance !== undefined && allowance !== undefined;
   const needsMint = readsReady && balance < amountWei;
@@ -224,6 +235,10 @@ export function SwapPanel(p: Props) {
           {t.swapped}{" "}
           <a href={`${OKLINK_TX}/${txHash}`} target="_blank" rel="noreferrer" className="underline">
             {t.view}
+          </a>
+          {" · "}
+          <a href="#dashboard" className="underline">
+            {t.viewPanel}
           </a>
         </p>
       ) : txHash && confirming ? (
