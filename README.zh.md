@@ -38,8 +38,11 @@ Flap 的发币合约**预留**了一条 Uniswap V4 毕业路径：枚举 `Migrat
 |---|---|
 | **FlapVenue hook** | [`0x5f07e9CA…4b1c9088`](https://www.oklink.com/x-layer-testnet/address/0x5f07e9CA7c006528bB21d098230F25364b1c9088) |
 | PoolManager（自部署） | [`0xd4438703…d4e7Eb04`](https://www.oklink.com/x-layer-testnet/address/0xd44387034102491Af58292fF1c7405AED4e7Eb04) |
+| PoolSwapTest（兑换路由） | [`0xB59271CD…E2fa7AF6`](https://www.oklink.com/x-layer-testnet/address/0xB59271CD9158Bb50125c3F9AC5CA013eE2fa7AF6) |
 | FLAP（已毕业税代币，无转账税） | [`0x91Eb5b51…675bE1556`](https://www.oklink.com/x-layer-testnet/address/0x91Eb5b51715AB2958d3087992176616675bE1556) |
 | USDT0（计价币，mock） | [`0xBEd71c18…74f05Ef3c`](https://www.oklink.com/x-layer-testnet/address/0xBEd71c18e2275F0A10c56c8f22EbFE774f05Ef3c) |
+
+以上每个合约的**源码均已在 OKLink 验证**（点开地址、切到 Contract 标签即可查看源码）。
 
 Hook 地址以 `…9088` 结尾，低位编码了权限标志 `afterInitialize | beforeSwap | beforeSwapReturnDelta`（用 `HookMiner` 挖出）。这次部署也说明 X Layer 测试网支持 EIP-1153 瞬态存储，因为 PoolManager 和真实 swap 都成功执行了。
 

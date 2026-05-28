@@ -38,8 +38,11 @@ Flap's launch contracts **reserve** a Uniswap V4 graduation path: the enum `Migr
 |---|---|
 | **FlapVenue hook** | [`0x5f07e9CA…4b1c9088`](https://www.oklink.com/x-layer-testnet/address/0x5f07e9CA7c006528bB21d098230F25364b1c9088) |
 | PoolManager (own deploy) | [`0xd4438703…d4e7Eb04`](https://www.oklink.com/x-layer-testnet/address/0xd44387034102491Af58292fF1c7405AED4e7Eb04) |
+| PoolSwapTest (swap router) | [`0xB59271CD…E2fa7AF6`](https://www.oklink.com/x-layer-testnet/address/0xB59271CD9158Bb50125c3F9AC5CA013eE2fa7AF6) |
 | FLAP (graduated tax token, no transfer tax) | [`0x91Eb5b51…675bE1556`](https://www.oklink.com/x-layer-testnet/address/0x91Eb5b51715AB2958d3087992176616675bE1556) |
 | USDT0 (quote, mock) | [`0xBEd71c18…74f05Ef3c`](https://www.oklink.com/x-layer-testnet/address/0xBEd71c18e2275F0A10c56c8f22EbFE774f05Ef3c) |
+
+Every contract above is **source-verified on OKLink** (open an address and check the Contract tab).
 
 The hook address ends in `…9088`; its low bits encode the permission flags `afterInitialize | beforeSwap | beforeSwapReturnDelta` (mined with `HookMiner`). The deploy also confirms EIP-1153 transient storage works on X Layer testnet, since the PoolManager and real swaps executed.
 
