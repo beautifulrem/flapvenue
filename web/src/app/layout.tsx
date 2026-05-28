@@ -16,9 +16,9 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FlapVenue — a working Uniswap V4 landing zone for Flap on X Layer",
+  title: "FlapVenue: a Uniswap V4 landing zone for Flap on X Layer",
   description:
-    "A working build of the Uniswap V4 graduation path Flap scoped (V4_UNI_MIGRATOR) but hasn't shipped. A decaying creator tax as a beforeSwap hook delta lets a Flap tax token hold concentrated liquidity on X Layer.",
+    "A working build of the Uniswap V4 graduation path Flap reserved (V4_UNI_MIGRATOR) but never shipped. A decaying creator tax as a beforeSwap hook delta lets a Flap tax token hold concentrated liquidity on X Layer.",
 };
 
 export default async function RootLayout({

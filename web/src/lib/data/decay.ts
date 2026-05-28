@@ -1,4 +1,4 @@
-// Linear tax decay — a faithful TS mirror of FlapVenue.sol `_currentTaxBps`:
+// Linear tax decay, a faithful TS mirror of FlapVenue.sol `_currentTaxBps`:
 //   taxBps(t) = startBps * (WINDOW - elapsed) / WINDOW, clamped to [0, startBps], 0 once elapsed >= WINDOW.
 // Kept in lockstep with the contract so the dashboard curve matches on-chain behavior exactly.
 
@@ -16,7 +16,7 @@ export function decayProgress(migrationTs: number, nowSec: number, windowSec: nu
   return Math.min(1, Math.max(0, p));
 }
 
-/** Sampled (dayOffset, bps) points across the full window — for plotting the decay curve. */
+/** Sampled (dayOffset, bps) points across the full window, for plotting the decay curve. */
 export function decaySeries(startBps: number, windowSec: number, points = 60): { t: number; bps: number }[] {
   const out: { t: number; bps: number }[] = [];
   for (let i = 0; i <= points; i++) {

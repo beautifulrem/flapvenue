@@ -1,7 +1,7 @@
 // Lightweight i18n: a central EN/ZH dictionary + cookie-based locale. The page resolves `lang`
 // server-side from the cookie and threads it down as a prop; the client LangToggle writes the cookie
 // and reloads. Technical identifiers (event names, token symbols, `status == DEX`, numbers, OHLC) stay
-// in English in both locales — standard for bilingual crypto UIs.
+// in English in both locales, as is standard for bilingual crypto UIs.
 
 export type Lang = "en" | "zh";
 export const LANG_COOKIE = "flapvenue_lang";
@@ -53,7 +53,7 @@ const en: Dict = {
   hero: {
     kicker: "OKX X Layer · Uniswap V4 Hook · chain {chain}",
     h1a: "The V4 venue", h1b: "Flap scoped", h1c: "but hasn't shipped.", h1d: "So we built it.",
-    para: "FlapVenue reproduces Flap's creator tax as a beforeSwap hook delta that decays to zero over {days} days — not an ERC-20 transfer tax. So a Flap tax token can hold concentrated liquidity, which its live graduation path doesn't allow today.",
+    para: "FlapVenue reproduces Flap's creator tax as a beforeSwap hook delta that decays to zero over {days} days. It's a hook delta, not an ERC-20 transfer tax, so a Flap tax token can hold concentrated liquidity. Its live graduation path can't do that today.",
     launch: "Launch dashboard →", trySwap: "Try a swap",
     badge: "demo of Flap's scoped V4_UNI_MIGRATOR path · not live",
     statWindow: "tax window", statRange: "start → end", statGate: "gate",
@@ -68,7 +68,7 @@ const en: Dict = {
   },
   dash: {
     kicker: "Live on X Layer · chain {chain}", heading: "On-chain, not simulated.",
-    sub1: "Unlike the terminal's demo feed above, every number here is read live from the deployed hook's events — ",
+    sub1: "Unlike the terminal's demo feed above, every number here is read live from the deployed hook's events: ",
     sub2: ".",
     poolTitle: "{flap}/{quote} · pool", creatorTaxDay: "creator tax · day {d}/{w}",
     curTax: "current creator tax", taxSkims: "tax skims", decaysTo: "decays to",
@@ -80,11 +80,11 @@ const en: Dict = {
     kicker: "Interactive", heading: "Swap through the hook.",
     steps: [
       "You swap in the FlapVenue pool.",
-      "beforeSwap skims the decaying creator tax from your input — as ERC-6909 claims. The token carries no transfer tax.",
+      "beforeSwap skims the decaying creator tax from your input and holds it as ERC-6909 claims. The token itself carries no transfer tax.",
       "The concentrated-liquidity swap runs on the remainder.",
       "Creator and protocol claim their accrued tax anytime.",
     ],
-    note: "The tax is a hook delta, not an ERC-20 transfer tax — which is exactly why a Flap tax token can live in a concentrated-liquidity pool at all (its live graduation path can't).",
+    note: "The tax is a hook delta, not an ERC-20 transfer tax. That's the whole reason a Flap tax token can sit in a concentrated-liquidity pool, which its live graduation path can't.",
     panelTitle: "Swap · FlapVenue pool", buy: "Buy", sell: "Sell", youPay: "you pay",
     rowTax: "creator tax skimmed", rowInto: "into the CL swap", rowOut: "{sym} into CL swap (illustrative)",
     connectToSwap: "Connect wallet to swap", recorded: "Skim recorded ✓", swap: "Swap",
@@ -98,7 +98,7 @@ const zh: Dict = {
   hero: {
     kicker: "OKX X Layer · Uniswap V4 Hook · 链 {chain}",
     h1a: "Flap 规划了的", h1b: "V4 落地场所，", h1c: "却还没上线。", h1d: "我们把它建了出来。",
-    para: "FlapVenue 把 Flap 的创作者税做成 beforeSwap 的 hook delta，在 {days} 天内线性衰减到零 —— 而不是 ERC-20 转账税。于是 Flap 的税代币第一次能进集中流动性池 —— 这是它现有的毕业路径做不到的。",
+    para: "FlapVenue 把 Flap 的创作者税做成 beforeSwap 的 hook delta，在 {days} 天内线性衰减到零，本质是个 hook delta，不是 ERC-20 转账税。所以 Flap 的税代币第一次能进集中流动性池，这是它现有毕业路径做不到的。",
     launch: "进入数据面板 →", trySwap: "试一笔兑换",
     badge: "Flap 规划但未上线的 V4_UNI_MIGRATOR 路径 · 演示",
     statWindow: "衰减周期", statRange: "起始 → 结束", statGate: "门禁",
@@ -113,7 +113,7 @@ const zh: Dict = {
   },
   dash: {
     kicker: "实时运行于 X Layer · 链 {chain}", heading: "链上真实，并非模拟。",
-    sub1: "与上方终端的演示数据不同，这里的每个数字都实时读取自已部署 hook 的事件 —— ",
+    sub1: "与上方终端的演示数据不同，这里的每个数字都实时读取自已部署 hook 的事件：",
     sub2: "。",
     poolTitle: "{flap}/{quote} · 池子", creatorTaxDay: "创作者税 · 第 {d}/{w} 天",
     curTax: "当前创作者税", taxSkims: "撇税笔数", decaysTo: "衰减至",
@@ -125,11 +125,11 @@ const zh: Dict = {
     kicker: "交互演示", heading: "穿过这个 hook 做一笔兑换。",
     steps: [
       "你在 FlapVenue 池子里发起兑换。",
-      "beforeSwap 从你的输入里撇取正在衰减的创作者税 —— 记为 ERC-6909 claims。代币本身没有转账税。",
+      "beforeSwap 从你的输入里撇取正在衰减的创作者税，记为 ERC-6909 claims。代币本身不带转账税。",
       "集中流动性兑换在剩余部分上执行。",
       "创作者与协议可随时领取各自累计的税。",
     ],
-    note: "税是一个 hook delta，而非 ERC-20 转账税 —— 这正是为什么 Flap 税代币能进集中流动性池（它现有的毕业路径做不到）。",
+    note: "税是一个 hook delta，不是 ERC-20 转账税。正因如此，Flap 税代币才能待在集中流动性池里，这是它现有毕业路径做不到的。",
     panelTitle: "兑换 · FlapVenue 池", buy: "买入", sell: "卖出", youPay: "你支付",
     rowTax: "撇取的创作者税", rowInto: "进入 CL 兑换", rowOut: "{sym} 进入 CL 兑换（示意）",
     connectToSwap: "连接钱包后兑换", recorded: "已记录撇税 ✓", swap: "兑换",

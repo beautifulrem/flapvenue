@@ -32,7 +32,7 @@ export function TradeTerminal({
     const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     if (reduced) {
       setLive(false);
-      return; // static snapshot — respect reduced-motion (no flashing/auto-updates)
+      return; // static snapshot; respect reduced-motion (no flashing/auto-updates)
     }
     setLive(true);
     let price = startPrice;

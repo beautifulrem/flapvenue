@@ -14,7 +14,7 @@ const H = 200;
 const PAD = 18;
 
 // Pure SVG decay curve. The line draws on load (stroke-dashoffset), the "now" marker sits where the
-// tax currently is along the 30-day decay. Lime line cooling to an amber marker — fresh → decaying.
+// tax currently is along the 30-day decay. Lime line cooling to an amber marker, from fresh to decaying.
 export function DecayCurve({ startBps, windowSec, elapsedSec, className, showMarker = true }: Props) {
   const pts = decaySeries(startBps, windowSec, 48);
   const plotW = W - PAD * 2;

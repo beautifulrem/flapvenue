@@ -104,7 +104,7 @@ export function PriceChart({ symbol, quote, livePrice, lang }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tf, type]);
 
-  // Fold the live price into the forming candle (imperative .update — no React re-render of the chart).
+  // Fold the live price into the forming candle (imperative .update, no React re-render of the chart).
   useEffect(() => {
     const s = seriesRef.current;
     const cur = curRef.current;

@@ -1,6 +1,6 @@
 // Synthetic price feed for the trading-terminal demo. The X Layer testnet pool has no OHLC history or
 // high-frequency ticks, so the candle/PnL/orderbook visuals run on this client-side simulated feed
-// (clearly a demo feed — the real on-chain numbers live in the dashboard panels below).
+// (clearly a demo feed; the real on-chain numbers live in the dashboard panels below).
 
 export type Candle = { time: number; open: number; high: number; low: number; close: number };
 export type Timeframe = "1m" | "5m" | "1H" | "1D";
@@ -85,7 +85,7 @@ export function pctChange(last: number, ref: number): number {
 /** A cumulative-PnL walk for the demo (positive green / negative red), anchored to 0 at start. */
 export function genPnl(points: number, seed = 13): { t: number; pnl: number }[] {
   const rnd = mulberry32(seed);
-  // A brief early dip (red, below baseline) then a clear sustained climb into profit (green) — a winning
+  // A brief early dip (red, below baseline) then a clear sustained climb into profit (green), a winning
   // demo position that still exercises the green/red split at the zero baseline.
   let pnl = 60;
   const out: { t: number; pnl: number }[] = [];
