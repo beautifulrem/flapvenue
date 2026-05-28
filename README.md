@@ -13,7 +13,11 @@ A **Uniswap V4 hook** on **OKX X Layer** that turns Flap's creator tax into a de
 
 **English** · [中文](./README.zh.md)
 
-[**🚀 Live demo**](https://web-beautifulremis-projects.vercel.app) · [**📜 Contracts**](#-live-on-x-layer-testnet-chain-1952) · [**🏆 Hackathon**](https://web3.okx.com/xlayer/build-x-hackathon/hook) · [**🧩 How it works**](#️-how-the-hook-works)
+[**🎬 Demo video**](https://youtu.be/lr0lQpsHzBk) · [**🚀 Live demo**](https://web-beautifulremis-projects.vercel.app) · [**📜 Contracts**](#-live-on-x-layer-testnet-chain-1952) · [**🏆 Hackathon**](https://web3.okx.com/xlayer/build-x-hackathon/hook) · [**🧩 How it works**](#️-how-the-hook-works)
+
+<a href="https://youtu.be/lr0lQpsHzBk"><img src="https://img.youtube.com/vi/lr0lQpsHzBk/hqdefault.jpg" alt="Watch the 2-minute FlapVenue demo" width="560"></a>
+
+▶ **[Watch the 2-minute demo on YouTube](https://youtu.be/lr0lQpsHzBk)**
 
 </div>
 

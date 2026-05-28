@@ -13,7 +13,11 @@
 
 [English](./README.md) · **中文**
 
-[**🚀 在线演示**](https://web-beautifulremis-projects.vercel.app) · [**📜 合约**](#-已上线-x-layer-测试网链-1952) · [**🏆 黑客松**](https://web3.okx.com/xlayer/build-x-hackathon/hook) · [**🧩 原理**](#️-hook-如何工作)
+[**🎬 演示视频**](https://youtu.be/lr0lQpsHzBk) · [**🚀 在线演示**](https://web-beautifulremis-projects.vercel.app) · [**📜 合约**](#-已上线-x-layer-测试网链-1952) · [**🏆 黑客松**](https://web3.okx.com/xlayer/build-x-hackathon/hook) · [**🧩 原理**](#️-hook-如何工作)
+
+<a href="https://youtu.be/lr0lQpsHzBk"><img src="https://img.youtube.com/vi/lr0lQpsHzBk/hqdefault.jpg" alt="观看 2 分钟 FlapVenue 演示" width="560"></a>
+
+▶ **[在 YouTube 观看 2 分钟演示](https://youtu.be/lr0lQpsHzBk)**
 
 </div>
 
