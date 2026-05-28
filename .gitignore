@@ -1,0 +1,42 @@
+# --- Secrets (never commit) ---
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.local
+**/.env.*.local
+# keep templates
+!**/.env.example
+
+# --- Node / frontend ---
+node_modules/
+**/node_modules/
+web/.next/
+**/.next/
+web/out/
+.vercel
+**/.vercel
+*.tsbuildinfo
+next-env.d.ts
+
+# --- Foundry / contracts ---
+contracts/out/
+contracts/cache/
+**/out/
+**/cache/
+contracts/broadcast/
+
+# --- Local tooling (codegraph index, etc.) ---
+.codegraph/
+
+# --- OS / editor ---
+.DS_Store
+*.log
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# --- Local design / planning notes (not part of the shipped repo) ---
+SPEC.md
+PLAN.md
+DESIGN.md

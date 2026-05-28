@@ -1,0 +1,220 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #07080a;
+  --color-surface: #0d0f13;
+  --color-surface2: #14171d;
+  --color-fg: #ecefea;
+  --color-muted: #8b909a;
+  --color-faint: #555a63;
+  --color-line: #1b1e25;
+  --color-accent: #b8ff2e; /* electric lime — X Layer freshness / brand + primary CTA */
+  --color-accentdim: #1f2a10;
+  --color-decay: #ff7a3c; /* amber — the cooling/decaying creator tax */
+  --color-decaydim: #2a1810;
+
+  /* Exchange semantics — price uses OKX/Asian 红涨绿跌 (up=red, down=green);
+     PnL uses sign convention (profit=green, loss=red). Flip here to change globally. */
+  --color-up: #f6465d; /* price up — red */
+  --color-down: #2ebd85; /* price down — green */
+  --color-updim: #2a1419;
+  --color-downdim: #0f241c;
+  --color-profit: #2ebd85; /* PnL positive — green */
+  --color-loss: #f6465d; /* PnL negative — red */
+
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jbmono), ui-monospace, "SFMono-Regular", monospace;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  background: var(--color-bg);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Atmospheric backdrop: layered radial mesh, faint grid, and a fixed grain overlay. */
+.atmosphere {
+  position: relative;
+  isolation: isolate;
+}
+.atmosphere::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(60rem 40rem at 12% 110%, color-mix(in oklab, var(--color-accent) 12%, transparent), transparent 60%),
+    radial-gradient(50rem 36rem at 92% -10%, color-mix(in oklab, var(--color-decay) 9%, transparent), transparent 55%),
+    radial-gradient(40rem 40rem at 50% 40%, #0b0e12, var(--color-bg) 70%);
+}
+.atmosphere::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background-image: linear-gradient(var(--color-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-line) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: radial-gradient(70% 60% at 50% 30%, #000 0%, transparent 80%);
+  mask-image: radial-gradient(70% 60% at 50% 30%, #000 0%, transparent 80%);
+  opacity: 0.5;
+}
+
+/* Fine film grain — placed as a fixed element in the layout. */
+.grain {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Hairline utility + accent glow */
+.hairline {
+  border: 1px solid var(--color-line);
+}
+.glow-accent {
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--color-accent) 30%, transparent),
+    0 0 40px -12px color-mix(in oklab, var(--color-accent) 60%, transparent);
+}
+
+/* Mono micro-label */
+.kicker {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+/* Staggered entrance */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise {
+  animation: rise 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes glide {
+  from {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
+  }
+}
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+.blink {
+  animation: blink 1.6s steps(2, jump-none) infinite;
+}
+
+/* Price-cell flash on tick change (data feedback, not decoration) */
+@keyframes flashUp {
+  0% {
+    background-color: color-mix(in oklab, var(--color-up) 38%, transparent);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+@keyframes flashDown {
+  0% {
+    background-color: color-mix(in oklab, var(--color-down) 38%, transparent);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+.flash-up {
+  animation: flashUp 0.45s ease-out;
+}
+.flash-down {
+  animation: flashDown 0.45s ease-out;
+}
+
+/* Live connection pulse */
+@keyframes pulsedot {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-down) 55%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+.pulse-dot {
+  animation: pulsedot 1.8s ease-out infinite;
+}
+
+/* Skeleton shimmer for chart/data loading */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-surface2);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--color-fg) 6%, transparent), transparent);
+  animation: shimmer 1.4s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flash-up,
+  .flash-down,
+  .pulse-dot,
+  .skeleton::after {
+    animation: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise,
+  .blink,
+  [style*="animation"] {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
