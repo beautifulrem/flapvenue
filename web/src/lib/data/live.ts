@@ -1,4 +1,4 @@
-import { createPublicClient, defineChain, http, formatUnits, type Address as ViemAddress } from "viem";
+import { createPublicClient, defineChain, http, formatUnits } from "viem";
 import type { Address, Commission, DataSource, Graduation, PoolMeta, PoolStats, TaxSkim } from "./types";
 import {
   DEPLOY_BLOCK,
@@ -93,13 +93,13 @@ const symOf = (m: Record<string, string>, addr: string) => m[addr.toLowerCase()]
 
 const gradsP = cached(() => scanLogs("HookGraduation"));
 const skimsP = cached(() => scanLogs("HookTaxSkim"));
-const protocolP = cached(
+const shareBpsP = cached(
   () =>
     client.readContract({
       address: FLAPVENUE_ADDRESS,
       abi: flapVenueAbi,
-      functionName: "protocolTreasury",
-    }) as Promise<ViemAddress>,
+      functionName: "protocolShareBps",
+    }) as Promise<number>,
 );
 
 async function blockTimes(blockNumbers: (bigint | null)[]): Promise<Map<string, number>> {
@@ -130,22 +130,25 @@ export const liveSource: DataSource = {
   },
 
   async getCommissions(): Promise<Commission[]> {
-    const [m, grads, protocol] = await Promise.all([symsP(), gradsP(), protocolP()]);
-    const creator = (grads[0]?.args.creator ?? protocol) as ViemAddress;
-    const sameAddr = creator.toLowerCase() === protocol.toLowerCase();
-
+    // protocolShareBps is immutable, so every skim splits creator/protocol by the same ratio. Derive
+    // each side from the all-time totalSkimmed rather than accrued[addr], which conflates the two when
+    // the creator and the protocol treasury are the same wallet (as in this demo deploy).
+    const [m, shareBps] = await Promise.all([symsP(), shareBpsP()]);
+    const protoFrac = shareBps / 10_000;
     return Promise.all(
       [FLAP_TOKEN, QUOTE_TOKEN].map(async (t) => {
-        const [total, cr, pr] = await Promise.all([
-          client.readContract({ address: FLAPVENUE_ADDRESS, abi: flapVenueAbi, functionName: "totalSkimmed", args: [t] }),
-          client.readContract({ address: FLAPVENUE_ADDRESS, abi: flapVenueAbi, functionName: "accrued", args: [creator, t] }),
-          client.readContract({ address: FLAPVENUE_ADDRESS, abi: flapVenueAbi, functionName: "accrued", args: [protocol, t] }),
-        ]);
+        const total = (await client.readContract({
+          address: FLAPVENUE_ADDRESS,
+          abi: flapVenueAbi,
+          functionName: "totalSkimmed",
+          args: [t],
+        })) as bigint;
+        const totalNum = Number(formatUnits(total, 18));
         return {
           symbol: symOf(m, t),
-          creatorAccrued: Number(formatUnits(cr as bigint, 18)),
-          protocolAccrued: sameAddr ? 0 : Number(formatUnits(pr as bigint, 18)),
-          totalSkimmed: Number(formatUnits(total as bigint, 18)),
+          creatorAccrued: totalNum * (1 - protoFrac),
+          protocolAccrued: totalNum * protoFrac,
+          totalSkimmed: totalNum,
         };
       }),
     );

@@ -36,6 +36,7 @@ export const flapVenueAbi = parseAbi([
   "function accrued(address recipient, address currency) view returns (uint256)",
   "function currentTaxBps(bytes32 poolId) view returns (uint256)",
   "function protocolTreasury() view returns (address)",
+  "function protocolShareBps() view returns (uint16)",
   "function poolConfig(bytes32 poolId) view returns (address flapToken, address commissionReceiver, uint64 migrationTs, uint16 startTaxBps)",
 ]);
 
