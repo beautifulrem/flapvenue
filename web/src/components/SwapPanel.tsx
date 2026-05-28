@@ -9,9 +9,10 @@ import {
   useReadContract,
   useSwitchChain,
   useWaitForTransactionReceipt,
+  useWatchAsset,
   useWriteContract,
 } from "wagmi";
-import { maxUint256, parseUnits } from "viem";
+import { formatUnits, maxUint256, parseUnits } from "viem";
 import {
   CURRENCY0,
   CURRENCY1,
@@ -51,6 +52,7 @@ const POOL_KEY = {
 const SETTINGS = { takeClaims: false, settleUsingBurn: false } as const;
 const MINT_AMOUNT = parseUnits("1000000", 18); // generous test-token mint so one click covers any demo size
 const OKLINK_TX = "https://www.oklink.com/x-layer-testnet/tx";
+const fmtBal = (b?: bigint) => (b === undefined ? "…" : fmtNum(Number(formatUnits(b, 18)), 2));
 
 export function SwapPanel(p: Props) {
   const t = getDict(p.lang).swap;
@@ -58,6 +60,7 @@ export function SwapPanel(p: Props) {
   const chainId = useChainId();
   const { connect, connectors } = useConnect();
   const { switchChain, isPending: switching } = useSwitchChain();
+  const { watchAsset } = useWatchAsset();
   const router = useRouter();
 
   const [amount, setAmount] = useState("100");
@@ -73,20 +76,29 @@ export function SwapPanel(p: Props) {
   const outSym = buy ? p.flapSymbol : p.quoteSymbol;
   const amountWei = amt > 0 ? parseUnits(String(amt), 18) : 0n;
   const wrongChain = isConnected && chainId !== XLAYER_TESTNET_CHAIN_ID;
+  const readEnabled = { enabled: !!address && !wrongChain };
 
-  const { data: balance, refetch: refetchBal } = useReadContract({
-    address: inputToken,
+  const { data: flapBal, refetch: refetchFlap } = useReadContract({
+    address: FLAP_TOKEN,
     abi: erc20Abi,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
-    query: { enabled: !!address && !wrongChain },
+    query: readEnabled,
   });
+  const { data: quoteBal, refetch: refetchQuote } = useReadContract({
+    address: QUOTE_TOKEN,
+    abi: erc20Abi,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    query: readEnabled,
+  });
+  const balance = buy ? quoteBal : flapBal;
   const { data: allowance, refetch: refetchAllow } = useReadContract({
     address: inputToken,
     abi: erc20Abi,
     functionName: "allowance",
     args: address ? [address, SWAP_ROUTER] : undefined,
-    query: { enabled: !!address && !wrongChain },
+    query: readEnabled,
   });
 
   const { writeContract, data: txHash, isPending: signing, error: writeError, reset } = useWriteContract();
@@ -94,10 +106,11 @@ export function SwapPanel(p: Props) {
 
   useEffect(() => {
     if (confirmed) {
-      refetchBal();
+      refetchFlap();
+      refetchQuote();
       refetchAllow();
     }
-  }, [confirmed, refetchBal, refetchAllow]);
+  }, [confirmed, refetchFlap, refetchQuote, refetchAllow]);
 
   // After a swap lands, refresh the server components (the dashboard above) once the data cache TTL
   // lapses, so the new HookTaxSkim and commission totals appear without a manual reload.
@@ -197,7 +210,14 @@ export function SwapPanel(p: Props) {
 
       {/* input */}
       <label className="mt-4 block">
-        <span className="kicker">{t.youPay}</span>
+        <div className="flex items-center justify-between">
+          <span className="kicker">{t.youPay}</span>
+          {isConnected && !wrongChain && (
+            <span className="font-mono text-[0.65rem] text-faint">
+              {t.balance}: {fmtBal(balance)} {inSym}
+            </span>
+          )}
+        </div>
         <div className="mt-1 flex items-center gap-2 rounded-md border border-line bg-bg px-3 py-3">
           <input
             inputMode="decimal"
@@ -250,6 +270,32 @@ export function SwapPanel(p: Props) {
         </p>
       ) : (
         <p className="mt-3 text-center font-mono text-[0.65rem] text-faint">{t.hint}</p>
+      )}
+
+      {/* balances + add tokens to wallet (the mock tokens aren't auto-detected by wallets) */}
+      {isConnected && !wrongChain && (
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t border-line pt-3 font-mono text-[0.6rem] text-faint">
+          <span>
+            {fmtBal(flapBal)} {p.flapSymbol} · {fmtBal(quoteBal)} {p.quoteSymbol}
+          </span>
+          <span className="flex items-center gap-2">
+            {t.addToWallet}:
+            <button
+              type="button"
+              onClick={() => watchAsset({ type: "ERC20", options: { address: FLAP_TOKEN, symbol: p.flapSymbol, decimals: 18 } })}
+              className="cursor-pointer underline hover:text-fg"
+            >
+              + {p.flapSymbol}
+            </button>
+            <button
+              type="button"
+              onClick={() => watchAsset({ type: "ERC20", options: { address: QUOTE_TOKEN, symbol: p.quoteSymbol, decimals: 18 } })}
+              className="cursor-pointer underline hover:text-fg"
+            >
+              + {p.quoteSymbol}
+            </button>
+          </span>
+        </div>
       )}
     </div>
   );
