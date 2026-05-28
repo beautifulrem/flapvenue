@@ -34,6 +34,12 @@ Flap 的发币合约**预留**了一条 Uniswap V4 毕业路径：枚举 `Migrat
 > **[▶ 打开在线演示 →](https://web-beautifulremis-projects.vercel.app)**  ·  页头可切换 EN / 中文。
 > _交易终端（K线 / 订单簿 / 盈亏）使用**模拟数据**；**真实链上**数字（衰减、撇税、佣金、毕业事件）在其下方的数据面板里。_
 
+**试一笔真实兑换（约一分钟）：**
+1. [打开演示](https://web-beautifulremis-projects.vercel.app)，先去 [X Layer 水龙头](https://www.okx.com/xlayer/faucet) 领测试网 OKB。新钱包需要 gas，这是唯一要手动做的一步。
+2. 连接钱包，按提示添加 / 切换到 X Layer 测试网（链 1952）。
+3. 在「兑换」面板点按钮走流程：自动 mint 测试代币 → 授权路由 → 兑换（各签一次名）。
+4. 点「加入钱包」即可在钱包里看到 FLAP / USDT0 余额。这笔兑换约 15 秒后会出现在上方的「撇税流水」和「累计佣金」面板。
+
 | 合约 | 地址（OKLink） |
 |---|---|
 | **FlapVenue hook** | [`0x5f07e9CA…4b1c9088`](https://www.oklink.com/x-layer-testnet/address/0x5f07e9CA7c006528bB21d098230F25364b1c9088) |

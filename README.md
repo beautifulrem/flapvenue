@@ -34,6 +34,12 @@ Flap's launch contracts **reserve** a Uniswap V4 graduation path: the enum `Migr
 > **[▶ Open the live demo →](https://web-beautifulremis-projects.vercel.app)**  ·  EN / 中文 toggle in the header.
 > _The trading terminal (candles / orderbook / PnL) runs on a **simulated feed**; the **real on-chain** numbers (decay, skims, commission, graduations) are in the dashboard below it._
 
+**Try a real swap (about a minute):**
+1. [Open the demo](https://web-beautifulremis-projects.vercel.app) and grab testnet OKB from the [X Layer faucet](https://www.okx.com/xlayer/faucet). Fresh wallets need gas; this is the only manual step.
+2. Connect a wallet and approve the prompt to add / switch to X Layer testnet (chain 1952).
+3. In the **Swap** panel, click the button through its steps: it mints test tokens, approves the router, then swaps (one wallet signature each).
+4. Use **Add to wallet** to see your FLAP / USDT0 balances. The swap then shows up in the **Tax skim feed** and **Commission** panels above within ~15s.
+
 | Contract | Address (OKLink) |
 |---|---|
 | **FlapVenue hook** | [`0x5f07e9CA…4b1c9088`](https://www.oklink.com/x-layer-testnet/address/0x5f07e9CA7c006528bB21d098230F25364b1c9088) |
