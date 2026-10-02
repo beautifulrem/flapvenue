@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: chaosxcode/hookguard@v1
+      - uses: chaosxcode/hookguard@1fd0ddab626f2578a43ae377cc2a5903d9073a5a # v1
         with:
           paths: contracts
           fail-on: never
